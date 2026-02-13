@@ -266,60 +266,90 @@ async function searchFreelancers() {
     }
 }
 
-// ---------------- Display Results
-function displayResults(list) {
+// ---------------- Display Results (RESTORED STYLING)
+function displayResults(freelancers) {
+    const resultsGrid = document.getElementById('resultsGrid');
 
-    const grid = document.getElementById('resultsGrid');
+    if (!resultsGrid) return;
 
-    grid.innerHTML = list.map(f => `
-        <div class="freelancer-card" onclick="showFreelancerDetail('${f._id}')">
-            <div class="card-name">${escapeHtml(f.fullName)}</div>
-            <div>${f.profession}</div>
-        </div>
-    `).join('');
+    resultsGrid.innerHTML = freelancers.map(freelancer => {
+
+        const professionData = freelancer.professionDetails || {};
+
+        const distanceText = freelancer.distance !== undefined
+            ? formatDistance(freelancer.distance)
+            : '';
+
+        return `
+            <div class="freelancer-card"
+                 onclick="showFreelancerDetail('${freelancer._id}')">
+
+                <div class="card-header">
+                    <div class="card-avatar">
+                        ${freelancer.profilePicture || professionData.icon || '👤'}
+                    </div>
+
+                    <div class="card-title">
+                        <div class="card-name">
+                            ${escapeHtml(freelancer.fullName)}
+                        </div>
+
+                        <div class="card-profession">
+                            ${professionData.icon || ''}
+                            ${professionData.name || freelancer.profession}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="card-info">
+
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <span>
+                                ${escapeHtml(freelancer.location.area)},
+                                ${escapeHtml(freelancer.location.city)}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">⏱️</span>
+                            <span>
+                                ${freelancer.experience}
+                                year${freelancer.experience !== 1 ? 's' : ''}
+                                experience
+                            </span>
+                        </div>
+
+                        ${
+                            freelancer.isVerified
+                                ? '<div class="verified-badge">✓ Verified</div>'
+                                : ''
+                        }
+
+                    </div>
+
+                    <div class="card-footer">
+
+                        <div class="card-rate">
+                            ₹${freelancer.rupeesPerHour}
+                            <span>/hour</span>
+                        </div>
+
+                        ${
+                            distanceText
+                                ? `<div class="card-distance">📍 ${distanceText}</div>`
+                                : ''
+                        }
+
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
-// ---------------- Freelancer Detail (FIXED)
-async function showFreelancerDetail(id) {
-
-    const modal = document.getElementById('freelancerModal');
-    const container = document.getElementById('freelancerDetail');
-
-    if (!modal || !container) return;
-
-    modal.classList.add('show');
-
-    container.innerHTML = `
-        <div class="loading-state">
-            <div class="loader"></div>
-            <p>Loading...</p>
-        </div>
-    `;
-
-    try {
-        const res = await fetch(`/api/freelancers/${id}`);
-        const data = await res.json();
-
-        if (data.success) {
-
-            const f = data.data;
-
-            container.innerHTML = `
-                <h2>${escapeHtml(f.fullName)}</h2>
-                <p>${f.profession}</p>
-                <p>Experience: ${f.experience} years</p>
-                <p>Rate: ₹${f.rupeesPerHour}/hr</p>
-                <p>${escapeHtml(f.location.area)}, ${escapeHtml(f.location.city)}</p>
-                <a href="tel:+91${f.phoneNumber}" class="contact-btn">
-                    📞 Call ${f.phoneNumber}
-                </a>
-            `;
-        }
-
-    } catch (err) {
-        container.innerHTML = "<p>Error loading profile</p>";
-    }
-}
 
 // ---------------- Reset
 function resetFilters() {

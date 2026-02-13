@@ -2,16 +2,13 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/localfreelancer', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        mongoose.set('bufferCommands', false);
 
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        await mongoose.connect(process.env.MONGO_URI);
+
+        console.log('MongoDB Connected');
     } catch (error) {
-        console.error(`❌ MongoDB Connection Error: ${error.message}`);
-        // Don't exit, allow the app to run without DB for demo
-        console.log('⚠️  Running without database connection...');
+        console.error('MongoDB Connection Error:', error.message);
     }
 };
 

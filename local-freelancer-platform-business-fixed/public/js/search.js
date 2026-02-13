@@ -348,6 +348,108 @@ function displayResults(freelancers) {
     }).join('');
 }
 
+// ---------------- Show Freelancer Detail (FULL VERSION)
+async function showFreelancerDetail(id) {
+
+    const modal = document.getElementById('freelancerModal');
+    const detailContainer = document.getElementById('freelancerDetail');
+
+    if (!modal || !detailContainer) return;
+
+    modal.classList.add('show');
+
+    detailContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loader"></div>
+            <p>Loading...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`/api/freelancers/${id}`);
+        const data = await response.json();
+
+        if (data.success) {
+
+            const freelancer = data.data;
+            const professionData = freelancer.professionDetails || {};
+
+            detailContainer.innerHTML = `
+                <div class="detail-header">
+
+                    <div class="detail-avatar">
+                        ${freelancer.profilePicture || professionData.icon || '👤'}
+                    </div>
+
+                    <div class="detail-name">
+                        ${escapeHtml(freelancer.fullName)}
+                    </div>
+
+                    <div class="detail-profession">
+                        ${professionData.icon || ''}
+                        ${professionData.name || freelancer.profession}
+                        ${
+                            freelancer.isVerified
+                                ? '<span class="verified-badge">✓ Verified</span>'
+                                : ''
+                        }
+                    </div>
+
+                </div>
+
+                <div class="detail-body">
+
+                    <div class="detail-info">
+
+                        <div class="detail-item">
+                            <div class="detail-label">Experience</div>
+                            <div class="detail-value">
+                                ${freelancer.experience} Years
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Rate</div>
+                            <div class="detail-value">
+                                ₹${freelancer.rupeesPerHour}/hr
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">
+                                ${escapeHtml(freelancer.location.area)}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">City</div>
+                            <div class="detail-value">
+                                ${escapeHtml(freelancer.location.city)}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <a href="tel:+91${freelancer.phoneNumber}" class="contact-btn">
+                        📞 Call +91 ${freelancer.phoneNumber}
+                    </a>
+
+                </div>
+            `;
+        } else {
+            detailContainer.innerHTML =
+                '<p class="error-message">Error loading profile</p>';
+        }
+
+    } catch (error) {
+        console.error(error);
+        detailContainer.innerHTML =
+            '<p class="error-message">Error loading profile</p>';
+    }
+}
+
+
 
 // ---------------- Reset
 function resetFilters() {

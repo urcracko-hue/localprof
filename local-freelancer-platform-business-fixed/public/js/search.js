@@ -266,16 +266,14 @@ async function searchFreelancers() {
     }
 }
 
-// ---------------- Display Results (RESTORED STYLING)
+// ---------------- Display Results (FULL STYLED VERSION)
 function displayResults(freelancers) {
     const resultsGrid = document.getElementById('resultsGrid');
-
     if (!resultsGrid) return;
 
     resultsGrid.innerHTML = freelancers.map(freelancer => {
 
         const professionData = freelancer.professionDetails || {};
-
         const distanceText = freelancer.distance !== undefined
             ? formatDistance(freelancer.distance)
             : '';

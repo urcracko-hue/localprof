@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+
 const connectDB = require('./config/db');
 const freelancerRoutes = require('./routes/freelancerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -23,11 +24,15 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Routes
+// ======================
+// API ROUTES
+// ======================
 app.use('/api/freelancers', freelancerRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Serve main pages
+// ======================
+// FRONTEND ROUTES
+// ======================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -48,39 +53,46 @@ app.get('/freelancer/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'freelancer-detail.html'));
 });
 
-// Error handling middleware
+// ======================
+// ERROR HANDLING
+// ======================
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ 
-        success: false, 
+
+    res.status(500).json({
+        success: false,
         message: 'Something went wrong!',
-        error: err.message 
+        error: err.message
     });
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ 
-        success: false, 
-        message: 'Route not found' 
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
     });
 });
 
+// ======================
+// LOCAL SERVER ONLY
+// (Netlify will ignore this)
+// ======================
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`
-    ╔═══════════════════════════════════════════════════════╗
-    ║                                                       ║
-    ║   🔧 Local Freelancer Platform is running!            ║
-    ║                                                       ║
-    ║   🌐 Server: http://localhost:${PORT}                    ║
-    ║   📝 Register: http://localhost:${PORT}/register         ║
-    ║   🔍 Search: http://localhost:${PORT}/search             ║
-    ║   🔐 Admin: http://localhost:${PORT}/admin               ║
-    ║                                                       ║
-    ╚═══════════════════════════════════════════════════════╝
-    `);
-});
+if (!process.env.NETLIFY) {
+    app.listen(PORT, () => {
+        console.log(`
+╔═══════════════════════════════════════════════════════╗
+║   🔧 Local Freelancer Platform is running!            ║
+║   🌐 Server: http://localhost:${PORT}
+║   📝 Register: http://localhost:${PORT}/register
+║   🔍 Search: http://localhost:${PORT}/search
+║   🔐 Admin: http://localhost:${PORT}/admin
+╚═══════════════════════════════════════════════════════╝
+        `);
+    });
+}
 
+// Export app for Netlify functions
 module.exports = app;
